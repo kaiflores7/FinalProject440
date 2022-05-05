@@ -150,22 +150,22 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            
+            if lastS > 0 {
             let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
             let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
             let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
             let IiPlus1 = lastI + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
-            
+
             lastS = SiPlus1
             lastR = RiPlus1
             lastZ = ZiPlus1
             lastI = IiPlus1
             
-            
             let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
                 solutionArrayS.append(contentsOf: [dataPointS])
             let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
                 solutionArrayZ.append(contentsOf: [dataPointZ])
+            }
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -240,7 +240,7 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            
+            if lastS > 0{
             let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
             let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
             let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
@@ -258,6 +258,7 @@ class CalculatePlotData: ObservableObject {
                 solutionArrayS.append(contentsOf: [dataPointS])
             let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
                 solutionArrayZ.append(contentsOf: [dataPointZ])
+            }
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -326,7 +327,7 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            
+            if lastS > 0 {
             let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
             let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
             let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
@@ -342,6 +343,7 @@ class CalculatePlotData: ObservableObject {
                 solutionArrayS.append(contentsOf: [dataPointS])
             let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
                 solutionArrayZ.append(contentsOf: [dataPointZ])
+            }
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -409,7 +411,7 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            
+        
             let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
             let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
             let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
