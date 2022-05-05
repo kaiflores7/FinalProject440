@@ -19,6 +19,6 @@ class ChangingPlotParameters: NSObject, ObservableObject {
     var yMin : Double = -2.0
     var xMin : Double = -2.0
     var lineColor: CPTColor = .blue()
-    var title: String = "Plot Title"
+    var title: String = "Plot"
     
 }

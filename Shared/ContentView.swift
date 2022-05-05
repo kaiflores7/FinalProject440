@@ -16,10 +16,37 @@ struct ContentView: View {
     @ObservedObject private var dataCalculator = CalculatePlotData()
     
     @State var modelVal: ModelType = .basic
-
+    @State var startPop: Double = 500
+    @State var stepSize: Double = 0.1
+    @State var startTime: Double = 0
+    @State var endTime: Double = 10
+    
+    private var doubleFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.minimumSignificantDigits = 1
+        f.maximumSignificantDigits = 6
+        return f
+    }()
+    
     var body: some View {
     HStack{
         VStack {
+            //input values: step size, starting population, starting time, ending time
+            VStack {
+                Text("Starting Population")
+                TextField("In thousands", value: $startPop, formatter: doubleFormatter)
+                    .frame(width: 100.0)
+                Text("Step Size")
+                TextField("Step Size", value: $stepSize, formatter: doubleFormatter)
+                    .frame(width: 100.0)
+                Text("Starting Time")
+                TextField("In years", value: $startTime, formatter: doubleFormatter)
+                    .frame(width: 100.0)
+                Text("Ending Time")
+                TextField("In years", value: $endTime, formatter: doubleFormatter)
+                    .frame(width: 100.0)
+            }.padding()
+            
             Text("Model")
             Picker("", selection: $modelVal) {
                 ForEach(ModelType.allCases) {
@@ -69,7 +96,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotBasic(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
+        dataCalculator.plotBasic(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -79,7 +106,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotInfection(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 9.8)
+        dataCalculator.plotInfection(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -89,7 +116,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotQuarantine(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 9)
+        dataCalculator.plotQuarantine(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -99,7 +126,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotTreatment(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 9)
+        dataCalculator.plotTreatment(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
         
     }
    
@@ -109,7 +136,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotErradication(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 9)
+        dataCalculator.plotErradication(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
         
     }
     
