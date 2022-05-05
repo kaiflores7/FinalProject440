@@ -17,25 +17,7 @@ struct ContentView: View {
     @State var modelVal: ModelType = .basic
 
     var body: some View {
-        
-        VStack{
-      
-            CorePlot(dataForPlot: $plotDataModel.plotData, changingPlotParameters: $plotDataModel.changingPlotParameters)
-                .setPlotPadding(left: 10)
-                .setPlotPadding(right: 10)
-                .setPlotPadding(top: 10)
-                .setPlotPadding(bottom: 10)
-                .padding()
-            
-            Divider()
-            
-            HStack{
-                Button("Calculate", action: {self.calculateModel()} )
-                .padding()
-                
-            }
-        }
-        
+    HStack{
         VStack {
             Text("Model")
             Picker("", selection: $modelVal) {
@@ -43,9 +25,41 @@ struct ContentView: View {
                     model in Text(model.toString())
                 }
             }.frame(width: 150.0)
+            
+            Button("Calculate", action: {self.calculateModel()} )
+            .padding()
+            
         }.padding()
         
-        
+        VStack{
+            TabView {
+                
+                CorePlot(dataForPlot: $plotDataModel.plotData, changingPlotParameters: $plotDataModel.changingPlotParameters)
+                    .setPlotPadding(left: 10)
+                    .setPlotPadding(right: 10)
+                    .setPlotPadding(top: 10)
+                    .setPlotPadding(bottom: 10)
+                    .padding()
+                    .tabItem {
+                        Text("Susceptible Plot")
+                    }
+                
+                CorePlot(dataForPlot: $plotDataModel.plotData, changingPlotParameters: $plotDataModel.changingPlotParameters)
+                    .setPlotPadding(left: 10)
+                    .setPlotPadding(right: 10)
+                    .setPlotPadding(top: 10)
+                    .setPlotPadding(bottom: 10)
+                    .padding()
+                    .tabItem {
+                        Text("Zombie Plot")
+                    }
+            }
+    
+            
+            Divider()
+            
+        }
+    }
     }
     
     func calculateYEqualsX(){
