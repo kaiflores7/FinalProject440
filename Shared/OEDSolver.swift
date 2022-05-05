@@ -6,25 +6,30 @@
 //
 
 import Foundation
+import SwiftUI
 import CorePlot
 
-class eulersMethod {
+class OEDSolver : ObservableObject {
+
     var plotDataModelS: PlotDataClass? = nil
     var plotDataModelZ: PlotDataClass? = nil
-
-    func dS(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double{
-        return pi - beta*S*Z - delta*S
-    }
     
-    func dZ(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double{
-        return beta*S*Z + zeta*S - alpha*S*Z
-    }
-    
-    func dR(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double{
-        return delta*S + alpha*S*Z - zeta*R
-    }
-    
-    func OEDSolve(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
+    func solveBasic(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
+        
+        func dS(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+        {
+            return pi - beta*S*Z - delta*S
+        }
+        
+        func dZ(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+        {
+            return beta*S*Z + zeta*S - alpha*S*Z
+        }
+        
+        func dR(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+        {
+            return delta*S + alpha*S*Z - zeta*R
+        }
         
         plotDataModelS!.changingPlotParameters.yMax = 1000
         plotDataModelS!.changingPlotParameters.yMin = 0.0

@@ -11,7 +11,8 @@ import CorePlot
 typealias plotDataType = [CPTScatterPlotField : Double]
 
 struct ContentView: View {
-    @ObservedObject var plotDataModel = PlotDataClass(fromLine: true)
+    @ObservedObject var plotDataModelS = PlotDataClass(fromLine: true)
+    @ObservedObject var plotDataModelZ = PlotDataClass(fromLine: true)
     @ObservedObject private var dataCalculator = CalculatePlotData()
     
     @State var modelVal: ModelType = .basic
@@ -34,7 +35,7 @@ struct ContentView: View {
         VStack{
             TabView {
                 
-                CorePlot(dataForPlot: $plotDataModel.plotData, changingPlotParameters: $plotDataModel.changingPlotParameters)
+                CorePlot(dataForPlot: $plotDataModelS.plotData, changingPlotParameters: $plotDataModelS.changingPlotParameters)
                     .setPlotPadding(left: 10)
                     .setPlotPadding(right: 10)
                     .setPlotPadding(top: 10)
@@ -44,7 +45,7 @@ struct ContentView: View {
                         Text("Susceptible Plot")
                     }
                 
-                CorePlot(dataForPlot: $plotDataModel.plotData, changingPlotParameters: $plotDataModel.changingPlotParameters)
+                CorePlot(dataForPlot: $plotDataModelZ.plotData, changingPlotParameters: $plotDataModelZ.changingPlotParameters)
                     .setPlotPadding(left: 10)
                     .setPlotPadding(right: 10)
                     .setPlotPadding(top: 10)
@@ -62,39 +63,71 @@ struct ContentView: View {
     }
     }
     
-    func calculateYEqualsX(){
+    func calculateBasic(){
         
         //pass the plotDataModel to the dataCalculator
-        dataCalculator.plotDataModel = self.plotDataModel
+        dataCalculator.plotDataModelS = self.plotDataModelS
+        dataCalculator.plotDataModelZ = self.plotDataModelZ
+        //Calculate the new plotting data and place in the plotDataModel
+        dataCalculator.plotBasic(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
+        
+    }
+    
+    func calculateInfection(){
+        
+        //pass the plotDataModel to the dataCalculator
+        dataCalculator.plotDataModelS = self.plotDataModelS
+        dataCalculator.plotDataModelZ = self.plotDataModelZ
+        //Calculate the new plotting data and place in the plotDataModel
+        dataCalculator.ploteToTheMinusX()
+        
+    }
+    
+    func calculateQuarantine(){
+        
+        //pass the plotDataModel to the dataCalculator
+        dataCalculator.plotDataModelS = self.plotDataModelS
+        dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
         dataCalculator.plotYEqualsX()
         
     }
     
-    func calculateYEqualseToTheMinusX(){
+    func calculateTreatment(){
         
         //pass the plotDataModel to the dataCalculator
-        dataCalculator.plotDataModel = self.plotDataModel
+        dataCalculator.plotDataModelS = self.plotDataModelS
+        dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
         dataCalculator.ploteToTheMinusX()
         
     }
    
+    func calculateErradication(){
+        
+        //pass the plotDataModel to the dataCalculator
+        dataCalculator.plotDataModelS = self.plotDataModelS
+        dataCalculator.plotDataModelZ = self.plotDataModelZ
+        //Calculate the new plotting data and place in the plotDataModel
+        dataCalculator.ploteToTheMinusX()
+        
+    }
+    
     func calculateModel(){
         if modelVal == .basic {
-            return self.calculateYEqualseToTheMinusX()
+            return self.calculateBasic()
         }
         else if modelVal == .infection {
-            return self.calculateYEqualsX()
+            return self.calculateInfection()
         }
         else if modelVal == .quarantine {
-            return self.calculateYEqualseToTheMinusX()
+        return self.calculateQuarantine()
         }
         else if modelVal == .treatment {
-            return self.calculateYEqualsX()
+            return self.calculateTreatment()
         }
         else if modelVal == .erradication {
-            return self.calculateYEqualseToTheMinusX()
+            return self.calculateErradication()
         }
     }
     
