@@ -79,7 +79,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.ploteToTheMinusX()
+        dataCalculator.plotInfection(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
         
     }
     
@@ -89,7 +89,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotYEqualsX()
+        dataCalculator.plotQuarantine(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
         
     }
     
@@ -99,7 +99,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.ploteToTheMinusX()
+        dataCalculator.plotTreatment(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
         
     }
    
@@ -109,7 +109,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.ploteToTheMinusX()
+        dataCalculator.plotErradication(stepSize: 0.1, startingPop: 500, startingTime: 0, endTime: 10)
         
     }
     

@@ -26,7 +26,7 @@ class PlotDataClass: NSObject, ObservableObject {
        
         
         //Intitialize the first plot
-        self.plotYEqualsX()
+        self.zeroData()
         
        }
     
@@ -55,9 +55,9 @@ class PlotDataClass: NSObject, ObservableObject {
         
         //set the Plot Parameters
         changingPlotParameters.yMax = 4.0
-        changingPlotParameters.yMin = -1.0
+        changingPlotParameters.yMin = -2.0
         changingPlotParameters.xMax = 4.0
-        changingPlotParameters.xMin = -1.0
+        changingPlotParameters.xMin = -2.0
         changingPlotParameters.xLabel = "x"
         changingPlotParameters.yLabel = "y"
         changingPlotParameters.lineColor = .red()
