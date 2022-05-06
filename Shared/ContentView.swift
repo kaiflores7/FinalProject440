@@ -16,15 +16,23 @@ struct ContentView: View {
     @ObservedObject private var dataCalculator = CalculatePlotData()
     
     @State var modelVal: ModelType = .basic
-    @State var startPop: Double = 500
+    @State var startPop: Int = 500
+    @State var startZombie: Int = 0
     @State var stepSize: Double = 0.1
     @State var startTime: Double = 0
     @State var endTime: Double = 10
+    @State var alpha: Double = 0.005
     
     private var doubleFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.minimumSignificantDigits = 1
         f.maximumSignificantDigits = 6
+        return f
+    }()
+    
+    private var intFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
         return f
     }()
     
@@ -34,7 +42,10 @@ struct ContentView: View {
             //input values: step size, starting population, starting time, ending time
             VStack {
                 Text("Starting Population")
-                TextField("In thousands", value: $startPop, formatter: doubleFormatter)
+                TextField("In thousands", value: $startPop, formatter: intFormatter)
+                    .frame(width: 100.0)
+                Text("Starting Zombie Population")
+                TextField("In thousands", value: $startZombie, formatter: intFormatter)
                     .frame(width: 100.0)
                 Text("Step Size")
                 TextField("Step Size", value: $stepSize, formatter: doubleFormatter)
@@ -87,16 +98,16 @@ struct ContentView: View {
             Divider()
             
         }
+        
     }
     }
     
     func calculateBasic(){
-        
         //pass the plotDataModel to the dataCalculator
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotBasic(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
+        dataCalculator.plotBasic(stepSize: stepSize, startingPop: startPop, startingZombies: startZombie, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -106,7 +117,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotInfection(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
+        dataCalculator.plotInfection(stepSize: stepSize, startingPop: startPop, startingZombies: startZombie, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -116,7 +127,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotQuarantine(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
+        dataCalculator.plotQuarantine(stepSize: stepSize, startingPop: startPop, startingZombies: startZombie, startingTime: startTime, endTime: endTime)
         
     }
     
@@ -126,7 +137,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotTreatment(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
+        dataCalculator.plotTreatment(stepSize: stepSize, startingPop: startPop, startingZombies: startZombie, startingTime: startTime, endTime: endTime)
         
     }
    
@@ -136,7 +147,7 @@ struct ContentView: View {
         dataCalculator.plotDataModelS = self.plotDataModelS
         dataCalculator.plotDataModelZ = self.plotDataModelZ
         //Calculate the new plotting data and place in the plotDataModel
-        dataCalculator.plotErradication(stepSize: stepSize, startingPop: startPop, startingTime: startTime, endTime: endTime)
+        dataCalculator.plotErradication(stepSize: stepSize, startingPop: startPop, startingZombies: startZombie, startingTime: startTime, endTime: endTime)
         
     }
     

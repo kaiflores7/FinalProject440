@@ -2,7 +2,7 @@
 //  CalculatePlotData.swift
 //  SwiftUICorePlotExample
 //
-//  Created by Jeff Terry on 12/22/20.
+//  Based on code by Jeff Terry on 12/22/20.
 //
 
 import Foundation
@@ -15,37 +15,39 @@ class CalculatePlotData: ObservableObject {
     var plotDataModelS: PlotDataClass? = nil
     var plotDataModelZ: PlotDataClass? = nil
     
-    //Basic Model
-    func plotBasic(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
-        
-        func dS(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
-        {
-            return pi - beta*S*Z - delta*S
-        }
-        
-        func dZ(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
-        {
-            return beta*S*Z + zeta*S - alpha*S*Z
-        }
-        
-        func dR(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
-        {
-            return delta*S + alpha*S*Z - zeta*R
-        }
+//Basic Model
+    
+    func dS(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+    {
+        return pi - beta*Double(S*Z) - delta*Double(S)
+    }
+    
+    func dZ(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+    {
+        return beta*Double(S*Z) + zeta*Double(R) - alpha*Double(S*Z)
+    }
+    
+    func dR(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double) -> Double
+    {
+        return delta*Double(S) + alpha*Double(S*Z) - zeta*Double(R)
+    }
+    
+    
+    func plotBasic(stepSize: Double, startingPop: Int, startingZombies: Int, startingTime: Double, endTime: Double){
         
         plotDataModelS!.changingPlotParameters.yMax = 700.0
-        plotDataModelS!.changingPlotParameters.yMin = 0.0
-        plotDataModelS!.changingPlotParameters.xMax = 10.0
-        plotDataModelS!.changingPlotParameters.xMin = 0.0
+        plotDataModelS!.changingPlotParameters.yMin = -100.0
+        plotDataModelS!.changingPlotParameters.xMax = 11.0
+        plotDataModelS!.changingPlotParameters.xMin = -1.0
         plotDataModelS!.changingPlotParameters.xLabel = "Time"
         plotDataModelS!.changingPlotParameters.yLabel = "Susceptible"
         plotDataModelS!.changingPlotParameters.lineColor = .blue()
         plotDataModelS!.changingPlotParameters.title = "Susceptible people over time"
         
-        plotDataModelZ!.changingPlotParameters.yMax = 1000.0
-        plotDataModelZ!.changingPlotParameters.yMin = 0.0
-        plotDataModelZ!.changingPlotParameters.xMax = 10.0
-        plotDataModelZ!.changingPlotParameters.xMin = 0.0
+        plotDataModelZ!.changingPlotParameters.yMax = 700.0
+        plotDataModelZ!.changingPlotParameters.yMin = -100.0
+        plotDataModelZ!.changingPlotParameters.xMax = 11.0
+        plotDataModelZ!.changingPlotParameters.xMin = -1.0
         plotDataModelZ!.changingPlotParameters.xLabel = "Time"
         plotDataModelZ!.changingPlotParameters.yLabel = "Zombie"
         plotDataModelZ!.changingPlotParameters.lineColor = .red()
@@ -56,32 +58,61 @@ class CalculatePlotData: ObservableObject {
         plotDataModelZ!.zeroData()
         var solutionArrayZ :[plotDataType] =  []
         
-        var lastS = startingPop
-        var lastZ = 0.0
+        var lastS = Double(startingPop-startingZombies)
+        var lastZ = Double(startingZombies)
         var lastR = 0.0
         
         
-        let dataPointS: plotDataType = [.X: 0.0, .Y: lastS]
+        let pi = 0.0
+        let alpha = 0.0005
+        let beta = 0.0095
+        let delta = 0.0001
+        let zeta = 0.0001
+        
+        
+        let dataPointS: plotDataType = [.X: 0.0, .Y: Double(lastS)]
             solutionArrayS.append(contentsOf: [dataPointS])
-        let dataPointZ: plotDataType = [.X: 0.0, .Y: lastR]
+        let dataPointZ: plotDataType = [.X: 0.0, .Y: Double(lastZ)]
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
             
-            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001) * (stepSize)
-            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001) * (stepSize)
-            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001) * (stepSize)
+            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta) * (stepSize)
+            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta) * (stepSize)
+            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta) * (stepSize)
+            
+            if SiPlus1 >= 0 {
+                    lastS = SiPlus1
+            }
+            else {
+                
+                lastS = 0
+                
+            }
+            
+            if RiPlus1 >= 0 {
+                    lastR = RiPlus1
+            }
+            else {
+                
+                lastR = 0
+                
+            }
+            
+            if ZiPlus1 >= 0 {
+                    lastZ = ZiPlus1
+            }
+            else {
+                
+                lastZ = 0
+                
+            }
             
             
-            lastS = SiPlus1
-            lastR = RiPlus1
-            lastZ = ZiPlus1
             
-            
-            
-            let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
+            let dataPointS: plotDataType = [.X: i, .Y: Double(SiPlus1)]
                 solutionArrayS.append(contentsOf: [dataPointS])
-            let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
+            let dataPointZ: plotDataType = [.X: i, .Y: Double(ZiPlus1)]
                 solutionArrayZ.append(contentsOf: [dataPointZ])
         }
     
@@ -91,43 +122,53 @@ class CalculatePlotData: ObservableObject {
         return
     }
 
+//Latent Infection model
+    
     //Latent Infection model
-    func plotInfection(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
+    
+    func dS_LI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
+    {
+        return (pi - beta * Double(S*Z) - delta * Double(S))
+    }
+    
+    func dI_LI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
+    {
+        let changeInI = beta * Double(S*Z) - rho * Double(I) - delta * Double(I)
+        return (changeInI)
+    }
+    
+    func dZ_LI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
+    {
+        let changeInZ = rho * Double(I) + zeta * Double(R) - alpha * Double(S*Z)
+        print(changeInZ)
+        return (changeInZ)
+    }
+    
+    func dR_LI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
+    {
+        return (delta * Double(S) + delta * Double(I) + alpha * Double(S*Z) - zeta * Double(R))
+    }
+    
+    
+    
+    func plotInfection(stepSize: Double, startingPop: Int, startingZombies: Int, startingTime: Double, endTime: Double){
         
-        func dS(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
-        {
-            return pi - beta*S*Z - delta*S
-        }
         
-        func dI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
-        {
-            return beta*S*Z - rho*I - delta*I
-        }
-        
-        func dZ(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
-        {
-            return rho*I + zeta*R - alpha*S*Z
-        }
-        
-        func dR(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double) -> Double
-        {
-            return delta*S + delta*I + alpha*S*Z - zeta*R
-        }
         
         
         plotDataModelS!.changingPlotParameters.yMax = 700.0
-        plotDataModelS!.changingPlotParameters.yMin = 0.0
-        plotDataModelS!.changingPlotParameters.xMax = 10.0
-        plotDataModelS!.changingPlotParameters.xMin = 0.0
+        plotDataModelS!.changingPlotParameters.yMin = -100.0
+        plotDataModelS!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelS!.changingPlotParameters.xMin = -1.0
         plotDataModelS!.changingPlotParameters.xLabel = "Time"
         plotDataModelS!.changingPlotParameters.yLabel = "Susceptible"
         plotDataModelS!.changingPlotParameters.lineColor = .blue()
         plotDataModelS!.changingPlotParameters.title = "Susceptible people over time"
         
-        plotDataModelZ!.changingPlotParameters.yMax = 1000.0
-        plotDataModelZ!.changingPlotParameters.yMin = 0.0
-        plotDataModelZ!.changingPlotParameters.xMax = 10.0
-        plotDataModelZ!.changingPlotParameters.xMin = 0.0
+        plotDataModelZ!.changingPlotParameters.yMax = 700.0
+        plotDataModelZ!.changingPlotParameters.yMin = -100.0
+        plotDataModelZ!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelZ!.changingPlotParameters.xMin = -1.0
         plotDataModelZ!.changingPlotParameters.xLabel = "Time"
         plotDataModelZ!.changingPlotParameters.yLabel = "Zombie"
         plotDataModelZ!.changingPlotParameters.lineColor = .red()
@@ -138,34 +179,72 @@ class CalculatePlotData: ObservableObject {
         plotDataModelZ!.zeroData()
         var solutionArrayZ :[plotDataType] =  []
         
-        var lastS = startingPop
-        var lastZ = 0.0
+        var lastS = Double(startingPop-startingZombies)
+        var lastZ = Double(startingZombies)
         var lastR = 0.0
         var lastI = 0.0
         
         
-        let dataPointS: plotDataType = [.X: 0.0, .Y: lastS]
+        let pi = 0.0
+        let alpha = 0.0005
+        let beta = 0.0095
+        let delta = 0.0001
+        let zeta = 0.0001
+        let rho = 0.005
+        
+        print (lastS, lastR, lastZ, lastI)
+        
+        let dataPointS: plotDataType = [.X: 0.0, .Y: Double(lastS + lastR)]
             solutionArrayS.append(contentsOf: [dataPointS])
-        let dataPointZ: plotDataType = [.X: 0.0, .Y: lastR]
+        let dataPointZ: plotDataType = [.X: 0.0, .Y: Double(lastZ + lastI)]
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
+    
+        
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            if lastS > 0 {
-            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
-            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
-            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
-            let IiPlus1 = lastI + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0) * (stepSize)
-
-            lastS = SiPlus1
-            lastR = RiPlus1
-            lastZ = ZiPlus1
-            lastI = IiPlus1
             
-            let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
-                solutionArrayS.append(contentsOf: [dataPointS])
-            let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
-                solutionArrayZ.append(contentsOf: [dataPointZ])
+            
+            let SiPlus1 = lastS + dS_LI(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho) * (stepSize)
+            let RiPlus1 = lastR + dR_LI(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho) * (stepSize)
+            let ZiPlus1 = lastZ + dZ_LI(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho) * (stepSize)
+            let IiPlus1 = lastI + dI_LI(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho) * (stepSize)
+            
+            if SiPlus1 >= 0 {
+                    lastS = SiPlus1
             }
+            else {
+                lastS = 0
+            }
+            
+            if RiPlus1 >= 0 {
+                    lastR = RiPlus1
+            }
+            else {
+                lastR = 0
+            }
+            
+            if ZiPlus1 >= 0 {
+                    lastZ = ZiPlus1
+            }
+            else {
+                lastZ = 0
+            }
+            
+            if IiPlus1 >= 0 {
+                    lastI = IiPlus1
+            }
+            else {
+                lastI = 0
+            }
+            
+            print (lastS, lastR, lastZ, lastI)
+            
+            
+            let dataPointS: plotDataType = [.X: i, .Y: Double(lastS + lastR)]
+                solutionArrayS.append(contentsOf: [dataPointS])
+            let dataPointZ: plotDataType = [.X: i, .Y: Double(lastZ + lastI)]
+                solutionArrayZ.append(contentsOf: [dataPointZ])
+            
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -174,49 +253,52 @@ class CalculatePlotData: ObservableObject {
         return
     }
     
+//Quarantine model. Introduces kappa(infected coming in) and sigma(zombies coming in) constants, gamma constant(people trying to escape), and dQ equation
+    func dS_Q(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
+    {
+        return (pi - beta * Double(S*Z) - delta * Double(S))
+    }
     
-    //Quarantine model. Introduces kappa(infected coming in) and sigma(zombies coming in) constants, gamma constant(people trying to escape), and dQ equation
     
-    func plotQuarantine(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
-        
-        func dS(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
-        {
-            return pi - beta*S*Z - delta*S
-        }
-        
-        func dI(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
-        {
-            return beta*S*Z - rho*I - delta*I - kappa*I
-        }
-        
-        func dZ(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
-        {
-            return rho*I + zeta*R - alpha*S*Z - sigma*Z
-        }
-        
-        func dR(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
-        {
-            return delta*S + delta*I + alpha*S*Z - zeta*R + gamma*Q
-        }
-        
-        func dQ(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
-        {
-            return kappa*I + sigma*Z - gamma*Q
-        }
+    func dI_Q(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
+    {
+        let changeInI = beta * Double(S*Z) - rho * Double(I) - delta * Double(I) - kappa * Double(I)
+        return (changeInI)
+    }
+    
+    func dZ_Q(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
+    {
+        let changeInZ = rho * Double(I) + zeta * Double(R) - alpha * Double(S*Z) - sigma * Double(Z)
+        print(changeInZ)
+        return (changeInZ)
+    }
+    
+    func dR_Q(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
+    {
+        return (delta * Double(S) + delta * Double(I) + alpha * Double(S*Z) - zeta * Double(R) + gamma * Double(Q))
+    }
+    
+    func dQ_Q(S: Double, Z: Double, R: Double, I: Double, Q: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, kappa: Double, sigma: Double, gamma: Double) -> Double
+    {
+        return (kappa * Double(I) + sigma * Double(Z) - gamma * Double(Q))
+    }
+    
+    
+    func plotQuarantine(stepSize: Double, startingPop: Int, startingZombies: Int, startingTime: Double, endTime: Double){
         
         plotDataModelS!.changingPlotParameters.yMax = 700.0
-        plotDataModelS!.changingPlotParameters.yMin = 0.0
-        plotDataModelS!.changingPlotParameters.xMax = 10.0
-        plotDataModelS!.changingPlotParameters.xMin = 0.0
+        plotDataModelS!.changingPlotParameters.yMin = -100.0
+        plotDataModelS!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelS!.changingPlotParameters.xMin = -1.0
         plotDataModelS!.changingPlotParameters.xLabel = "Time"
         plotDataModelS!.changingPlotParameters.yLabel = "Susceptible"
         plotDataModelS!.changingPlotParameters.lineColor = .blue()
         plotDataModelS!.changingPlotParameters.title = "Susceptible people over time"
         
-        plotDataModelZ!.changingPlotParameters.yMax = 1000.0
-        plotDataModelZ!.changingPlotParameters.yMin = 0.0
-        plotDataModelZ!.changingPlotParameters.xMax = 10.0
-        plotDataModelZ!.changingPlotParameters.xMin = 0.0
+        plotDataModelZ!.changingPlotParameters.yMax = 700.0
+        plotDataModelZ!.changingPlotParameters.yMin = -100.0
+        plotDataModelZ!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelZ!.changingPlotParameters.xMin = -1.0
         plotDataModelZ!.changingPlotParameters.xLabel = "Time"
         plotDataModelZ!.changingPlotParameters.yLabel = "Zombie"
         plotDataModelZ!.changingPlotParameters.lineColor = .red()
@@ -227,38 +309,89 @@ class CalculatePlotData: ObservableObject {
         plotDataModelZ!.zeroData()
         var solutionArrayZ :[plotDataType] =  []
         
-        var lastS = startingPop
-        var lastZ = 0.0
+        var lastS = Double(startingPop-startingZombies)
+        var lastZ = Double(startingZombies)
         var lastR = 0.0
         var lastI = 0.0
         var lastQ = 0.0
         
+        let pi = 0.0
+        let alpha = 0.0005
+        let beta = 0.0095
+        let delta = 0.0001
+        let zeta = 0.0001
+        let rho = 0.5
+        let kappa = 0.002
+        let sigma = 0.01
+        let gamma = 0.002
         
-        let dataPointS: plotDataType = [.X: 0.0, .Y: lastS]
+        print (lastS, lastR, lastZ, lastI, lastQ)
+        
+        let dataPointS: plotDataType = [.X: 0.0, .Y: Double(lastS + lastR)]
             solutionArrayS.append(contentsOf: [dataPointS])
-        let dataPointZ: plotDataType = [.X: 0.0, .Y: lastR]
+        let dataPointZ: plotDataType = [.X: 0.0, .Y: Double(lastZ + lastI)]
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            if lastS > 0{
-            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
-            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
-            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
-            let IiPlus1 = lastI + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
-            let QiPlus1 = lastQ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, kappa: 0.002, sigma: 0.01, gamma: 0.002) * (stepSize)
             
-            lastS = SiPlus1
-            lastR = RiPlus1
-            lastZ = ZiPlus1
-            lastI = IiPlus1
-            lastQ = QiPlus1
+            let SiPlus1 = lastS + dS_Q(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, kappa: kappa, sigma: sigma, gamma: gamma) * (stepSize)
+            let RiPlus1 = lastR + dR_Q(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, kappa: kappa, sigma: sigma, gamma: gamma) * (stepSize)
+            let ZiPlus1 = lastZ + dZ_Q(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, kappa: kappa, sigma: sigma, gamma: gamma) * (stepSize)
+            let IiPlus1 = lastI + dZ_Q(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, kappa: kappa, sigma: sigma, gamma: gamma) * (stepSize)
+            let QiPlus1 = lastQ + dZ_Q(S: lastS, Z: lastZ, R: lastR, I: lastI, Q: lastQ, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, kappa: kappa, sigma: sigma, gamma: gamma) * (stepSize)
             
-            
-            let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
-                solutionArrayS.append(contentsOf: [dataPointS])
-            let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
-                solutionArrayZ.append(contentsOf: [dataPointZ])
+            if SiPlus1 >= 0 {
+                    lastS = SiPlus1
             }
+            else {
+                
+                lastS = 0
+                
+            }
+            
+            if RiPlus1 >= 0 {
+                    lastR = RiPlus1
+            }
+            else {
+                
+                lastR = 0
+                
+            }
+            
+            if ZiPlus1 >= 0 {
+                    lastZ = ZiPlus1
+            }
+            else {
+                
+                lastZ = 0
+                
+            }
+            
+            if IiPlus1 >= 0 {
+                    lastI = IiPlus1
+            }
+            else {
+                
+                lastI = 0
+                
+            }
+            
+            if QiPlus1 >= 0 {
+                    lastQ = QiPlus1
+            }
+            else {
+                
+                lastQ = 0
+                
+            }
+            
+            print (lastS, lastR, lastZ, lastI)
+            
+            
+            let dataPointS: plotDataType = [.X: i, .Y: Double(lastS + lastR)]
+                solutionArrayS.append(contentsOf: [dataPointS])
+            let dataPointZ: plotDataType = [.X: i, .Y: Double(lastZ + lastI + lastQ)]
+                solutionArrayZ.append(contentsOf: [dataPointZ])
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -268,43 +401,44 @@ class CalculatePlotData: ObservableObject {
     }
     
 //Treatment Model. Takes Q away, introduces constant c (cured)
+    func dS_T(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
+    {
+        return (pi - beta * Double(S*Z) - delta * Double(S) + c * Double(Z))
+    }
     
-    func plotTreatment(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
-        
-        func dS(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
-        {
-            return pi - beta*S*Z - delta*S + c*Z
-        }
-        
-        func dI(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
-        {
-            return beta*S*Z - rho*I - delta*I
-        }
-        
-        func dZ(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
-        {
-            return rho*I + zeta*R - alpha*S*Z - c*Z
-        }
-        
-        func dR(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
-        {
-            return delta*S + delta*I + alpha*S*Z - zeta*R
-        }
-        
+    func dI_T(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
+    {
+        let changeInI = beta * Double(S*Z) - rho * Double(I) - delta * Double(I)
+        return (changeInI)
+    }
+    
+    func dZ_T(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
+    {
+        let changeInZ = rho * Double(I) + zeta * Double(R) - alpha * Double(S*Z) - c * Double(Z)
+        print(changeInZ)
+        return (changeInZ)
+    }
+    
+    func dR_T(S: Double, Z: Double, R: Double, I: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, rho: Double, c: Double) -> Double
+    {
+        return (delta * Double(S) + delta * Double(I) + alpha * Double(S*Z) - zeta * Double(R))
+    }
+    
+    func plotTreatment(stepSize: Double, startingPop: Int, startingZombies: Int, startingTime: Double, endTime: Double){
         
         plotDataModelS!.changingPlotParameters.yMax = 700.0
-        plotDataModelS!.changingPlotParameters.yMin = 0.0
-        plotDataModelS!.changingPlotParameters.xMax = 10.0
-        plotDataModelS!.changingPlotParameters.xMin = 0.0
+        plotDataModelS!.changingPlotParameters.yMin = -100.0
+        plotDataModelS!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelS!.changingPlotParameters.xMin = -1.0
         plotDataModelS!.changingPlotParameters.xLabel = "Time"
         plotDataModelS!.changingPlotParameters.yLabel = "Susceptible"
         plotDataModelS!.changingPlotParameters.lineColor = .blue()
         plotDataModelS!.changingPlotParameters.title = "Susceptible people over time"
         
-        plotDataModelZ!.changingPlotParameters.yMax = 1000.0
-        plotDataModelZ!.changingPlotParameters.yMin = 0.0
-        plotDataModelZ!.changingPlotParameters.xMax = 10.0
-        plotDataModelZ!.changingPlotParameters.xMin = 0.0
+        plotDataModelZ!.changingPlotParameters.yMax = 700.0
+        plotDataModelZ!.changingPlotParameters.yMin = -100.0
+        plotDataModelZ!.changingPlotParameters.xMax = endTime+0.1*endTime
+        plotDataModelZ!.changingPlotParameters.xMin = -1.0
         plotDataModelZ!.changingPlotParameters.xLabel = "Time"
         plotDataModelZ!.changingPlotParameters.yLabel = "Zombie"
         plotDataModelZ!.changingPlotParameters.lineColor = .red()
@@ -315,11 +449,20 @@ class CalculatePlotData: ObservableObject {
         plotDataModelZ!.zeroData()
         var solutionArrayZ :[plotDataType] =  []
         
-        var lastS = startingPop
-        var lastZ = 0.0
+        var lastS = Double(startingPop - startingZombies)
+        var lastZ = Double(startingZombies)
         var lastR = 0.0
         var lastI = 0.0
         
+        let pi = 0.0
+        let alpha = 0.0005
+        let beta = 0.0095
+        let delta = 0.0001
+        let zeta = 0.0001
+        let rho = 0.5
+        let c = 0.02
+        
+        print (lastS, lastR, lastZ, lastI)
         
         let dataPointS: plotDataType = [.X: 0.0, .Y: lastS]
             solutionArrayS.append(contentsOf: [dataPointS])
@@ -327,23 +470,53 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-            if lastS > 0 {
-            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
-            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
-            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
-            let IiPlus1 = lastI + dZ(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, rho: 5.0, c: 0.02) * (stepSize)
             
-            lastS = SiPlus1
-            lastR = RiPlus1
-            lastZ = ZiPlus1
-            lastI = IiPlus1
+            let SiPlus1 = lastS + dS_T(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, c: c) * (stepSize)
+            let RiPlus1 = lastR + dR_T(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, c: c) * (stepSize)
+            let ZiPlus1 = lastZ + dZ_T(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, c: c) * (stepSize)
+            let IiPlus1 = lastI + dI_T(S: lastS, Z: lastZ, R: lastR, I: lastI, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, rho: rho, c: c) * (stepSize)
+            
+            if SiPlus1 >= 0 {
+                               lastS = SiPlus1
+                       }
+                       else {
+                           
+                           lastS = 0
+                           
+                       }
+                       
+                       if RiPlus1 >= 0 {
+                               lastR = RiPlus1
+                       }
+                       else {
+                           
+                           lastR = 0
+                           
+                       }
+                       
+                       if ZiPlus1 >= 0 {
+                               lastZ = ZiPlus1
+                       }
+                       else {
+                           
+                           lastZ = 0
+                           
+                       }
+                       
+                       if IiPlus1 >= 0 {
+                               lastI = IiPlus1
+                       }
+                       else {
+                           
+                           lastI = 0
+                           
+                       }
             
             
             let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
                 solutionArrayS.append(contentsOf: [dataPointS])
             let dataPointZ: plotDataType = [.X: i, .Y: RiPlus1]
                 solutionArrayZ.append(contentsOf: [dataPointZ])
-            }
         }
     
         plotDataModelS!.appendData(dataPoint: solutionArrayS)
@@ -353,42 +526,41 @@ class CalculatePlotData: ObservableObject {
     }
     
 //Basic Model with addition of deltaZ function, and kappa and n constants
+        func dS_E(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
+        {
+            return pi - beta*Double(S*Z) - delta*Double(S)
+        }
+        
+        func dZ_E(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
+        {
+            return beta*Double(S*Z) + zeta*Double(R) - alpha*Double(S*Z)
+        }
+        
+        func dR_E(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
+        {
+            return delta*Double(S) + alpha*Double(S*Z) - zeta*Double(R)
+        }
     
-    func plotErradication(stepSize: Double, startingPop: Double, startingTime: Double, endTime: Double){
-        
-        func dS(S: Double, Z: Double, R: Double, deltaZ: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
+        func deltaZ_E(S: Double, Z: Double, R: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
         {
-            return pi - beta*S*Z - delta*S
+            return ( -kappa*n*Double(Z))
         }
-        
-        func dZ(S: Double, Z: Double, R: Double, deltaZ: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
-        {
-            return beta*S*Z + zeta*S - alpha*S*Z
-        }
-        
-        func dR(S: Double, Z: Double, R: Double, deltaZ: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
-        {
-            return delta*S + alpha*S*Z - zeta*R
-        }
-        
-        func deltaZ(S: Double, Z: Double, R: Double, deltaZ: Double, pi: Double, alpha: Double, beta: Double, delta: Double, zeta: Double, kappa: Double, n: Double) -> Double
-        {
-            return -kappa*n*Z
-        }
+    
+    func plotErradication(stepSize: Double, startingPop: Int, startingZombies: Int, startingTime: Double, endTime: Double){
         
         plotDataModelS!.changingPlotParameters.yMax = 700.0
-        plotDataModelS!.changingPlotParameters.yMin = 0.0
-        plotDataModelS!.changingPlotParameters.xMax = 10.0
-        plotDataModelS!.changingPlotParameters.xMin = 0.0
+        plotDataModelS!.changingPlotParameters.yMin = -100.0
+        plotDataModelS!.changingPlotParameters.xMax = 11.0
+        plotDataModelS!.changingPlotParameters.xMin = -1.0
         plotDataModelS!.changingPlotParameters.xLabel = "Time"
         plotDataModelS!.changingPlotParameters.yLabel = "Susceptible"
         plotDataModelS!.changingPlotParameters.lineColor = .blue()
         plotDataModelS!.changingPlotParameters.title = "Susceptible people over time"
         
-        plotDataModelZ!.changingPlotParameters.yMax = 1000.0
-        plotDataModelZ!.changingPlotParameters.yMin = 0.0
-        plotDataModelZ!.changingPlotParameters.xMax = 10.0
-        plotDataModelZ!.changingPlotParameters.xMin = 0.0
+        plotDataModelZ!.changingPlotParameters.yMax = 700.0
+        plotDataModelZ!.changingPlotParameters.yMin = -100.0
+        plotDataModelZ!.changingPlotParameters.xMax = 11.0
+        plotDataModelZ!.changingPlotParameters.xMin = -1.0
         plotDataModelZ!.changingPlotParameters.xLabel = "Time"
         plotDataModelZ!.changingPlotParameters.yLabel = "Zombie"
         plotDataModelZ!.changingPlotParameters.lineColor = .red()
@@ -399,11 +571,18 @@ class CalculatePlotData: ObservableObject {
         plotDataModelZ!.zeroData()
         var solutionArrayZ :[plotDataType] =  []
         
-        var lastS = startingPop
-        var lastZ = 0.0
+        var lastS = Double(startingPop-startingZombies)
+        var lastZ = Double(startingZombies)
         var lastR = 0.0
         var lastDeltaZ = 0.0
         
+        let pi = 0.0
+        let alpha = 0.0005
+        let beta = 0.0095
+        let delta = 0.0001
+        let zeta = 0.0001
+        let kappa = 0.25
+        let n = 4.0
         
         let dataPointS: plotDataType = [.X: 0.0, .Y: lastS]
             solutionArrayS.append(contentsOf: [dataPointS])
@@ -411,19 +590,39 @@ class CalculatePlotData: ObservableObject {
             solutionArrayZ.append(contentsOf: [dataPointZ])
         
         for i in stride(from: startingTime, to: endTime, by: stepSize){
-        
-            let SiPlus1 = lastS + dS(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
-            let RiPlus1 = lastR + dR(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
-            let ZiPlus1 = lastZ + dZ(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
-            let deltaZiPlus1 = lastDeltaZ + dZ(S: lastS, Z: lastZ, R: lastR, deltaZ: lastDeltaZ, pi: 0.0, alpha: 0.005, beta: 0.0095, delta: 0.0001, zeta: 0.0001, kappa: 0.25, n:3.0) * (stepSize)
             
+            let SiPlus1 = lastS + dS_E(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, kappa: kappa, n: n) * (stepSize)
+            let RiPlus1 = lastR + dR_E(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, kappa: kappa, n: n) * (stepSize)
+            let ZiPlus1 = lastZ + dZ_E(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, kappa: kappa, n: n) * (stepSize)
+            let deltaZiPlus1 = lastDeltaZ + deltaZ_E(S: lastS, Z: lastZ, R: lastR, pi: pi, alpha: alpha, beta: beta, delta: delta, zeta: zeta, kappa: kappa, n: n) * (stepSize)
             
-            lastS = SiPlus1
-            lastR = RiPlus1
-            lastZ = ZiPlus1
-            lastDeltaZ = deltaZiPlus1
+            if SiPlus1 >= 0 {
+                lastS = SiPlus1
+            }
+            else {
+                lastS = 0
+            }
             
+            if RiPlus1 >= 0 {
+                lastR = RiPlus1
+            }
+            else {
+                lastR = 0
+            }
             
+            if ZiPlus1 >= 0 {
+                lastZ = ZiPlus1
+            }
+            else {
+                lastZ = 0
+            }
+            
+            if deltaZiPlus1 >= 0 {
+                lastDeltaZ = deltaZiPlus1
+            }
+            else {
+                lastDeltaZ = 0
+            }
             
             let dataPointS: plotDataType = [.X: i, .Y: SiPlus1]
                 solutionArrayS.append(contentsOf: [dataPointS])
